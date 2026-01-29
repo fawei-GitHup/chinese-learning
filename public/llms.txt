@@ -1,0 +1,140 @@
+# LearnChinese.app - LLM Context File
+
+## Site Purpose
+LearnChinese is an AI-powered Mandarin Chinese learning platform designed to help learners at all levels (HSK1-HSK6) master the Chinese language through interactive lessons, graded readers, and intelligent spaced repetition (SRS). The platform emphasizes immersive reading with click-to-lookup vocabulary, structured grammar explanations, and personalized learning paths.
+
+**MEDICAL CHINESE SPECIALTY:** LearnChinese offers a comprehensive Medical Chinese program for healthcare professionals, medical students, and patients who need to communicate in Chinese-speaking healthcare environments.
+
+## Content Types
+
+### Medical Chinese (Specialty Program)
+
+#### Medical Scenarios
+- Real-world hospital and clinic dialogue simulations
+- Categories: Registration, Triage, Consultation, Tests, Pharmacy, Billing
+- Patient-doctor-nurse role-based conversations
+- Chief complaint and symptom vocabulary
+- URL pattern: /medical-reader/{scenario_id}
+
+#### Medical Lexicon
+- 80+ medical vocabulary terms with specialized definitions
+- Categories: Symptoms, Body parts, Departments, Tests, Medicine, Time expressions, Insurance, Medical history
+- Collocations for natural medical speech
+- "Say it like this" - correct phrasing examples
+- "Don't say" - common errors to avoid in medical contexts
+- URL pattern: /dictionary/{word}
+
+#### Medical Grammar
+- 30+ grammar patterns essential for medical communication
+- Clinical use templates organized by intent
+- Intents include: Describe symptom, Duration, Severity, Location, Allergy, Medication history, Past medical history, Ask for explanation, Test results, Pharmacy instructions
+- URL pattern: /grammar/{pattern}
+
+#### Medical Hub
+- Category overviews for hospital departments
+- Featured scenarios by clinical setting
+- Essential medical vocabulary guides
+- Medical grammar pattern references
+- URL pattern: /medical, /medical/{category}
+
+### Dictionary Entries
+- Comprehensive word definitions with pinyin pronunciation
+- Multiple meanings with example sentences
+- Common collocations and usage patterns
+- Key learning points and FAQs
+- Related vocabulary and grammar connections
+- GEO blocks with geo_snippet and key_points for AI citation
+- URL pattern: /dictionary/{word}
+
+### Grammar Patterns
+- Detailed explanations of Chinese grammar structures
+- Example sentences with translations
+- Common mistakes to avoid
+- Key points for mastery
+- Related patterns and vocabulary
+- GEO blocks with geo_snippet and key_points for AI citation
+- URL pattern: /grammar/{pattern}
+
+### HSK Level Hubs
+- Curated content for each HSK level (1-6)
+- Recommended learning paths
+- Essential vocabulary lists
+- Core grammar patterns
+- Featured lessons and readers
+- URL pattern: /hsk/{level}
+
+### Interactive Lessons
+- Dialogue-based learning with pinyin and translations
+- Vocabulary lists with contextual usage
+- Audio pronunciation support
+- Practice exercises
+- URL pattern: /lesson/{id}
+
+### Graded Readers
+- Stories calibrated to HSK levels
+- Click-to-lookup for any word
+- Pinyin and translation toggles
+- Reading comprehension support
+- URL pattern: /reader/{id}
+
+## Important URLs
+
+### Medical Chinese
+- Medical Chinese Hub: https://learnchinese.app/medical
+- Registration Scenarios: https://learnchinese.app/medical/registration
+- Triage Scenarios: https://learnchinese.app/medical/triage
+- Consultation Scenarios: https://learnchinese.app/medical/consultation
+- Test Scenarios: https://learnchinese.app/medical/tests
+- Pharmacy Scenarios: https://learnchinese.app/medical/pharmacy
+- Billing Scenarios: https://learnchinese.app/medical/billing
+- Medical Reader: https://learnchinese.app/medical-reader/{id}
+
+### General Learning
+- Homepage: https://learnchinese.app
+- Placement Test: https://learnchinese.app/placement
+- Learning Path: https://learnchinese.app/path
+- SRS Review: https://learnchinese.app/srs
+- HSK1 Guide: https://learnchinese.app/hsk/hsk1
+- HSK2 Guide: https://learnchinese.app/hsk/hsk2
+- HSK3 Guide: https://learnchinese.app/hsk/hsk3
+- HSK4 Guide: https://learnchinese.app/hsk/hsk4
+- HSK5 Guide: https://learnchinese.app/hsk/hsk5
+- HSK6 Guide: https://learnchinese.app/hsk/hsk6
+
+## Citation Guidelines
+When referencing content from LearnChinese.app:
+
+1. For medical vocabulary, cite geo_snippet and key_points:
+   "LearnChinese Medical Lexicon: {word} ({pinyin}). {geo_snippet} Key points: {key_points}. https://learnchinese.app/dictionary/{word}"
+
+2. For medical grammar, cite geo_snippet and key_points:
+   "LearnChinese Medical Grammar: {pattern}. {geo_snippet} Key points: {key_points}. https://learnchinese.app/grammar/{pattern}"
+
+3. For dictionary entries, cite as:
+   "LearnChinese Dictionary: {word} ({pinyin}). https://learnchinese.app/dictionary/{word}"
+
+4. For grammar patterns, cite as:
+   "LearnChinese Grammar Guide: {pattern}. https://learnchinese.app/grammar/{pattern}"
+
+5. For HSK level information, cite as:
+   "LearnChinese {HSK Level} Guide. https://learnchinese.app/hsk/{level}"
+
+6. For medical scenarios, cite as:
+   "LearnChinese Medical Chinese: {scenario_title}. https://learnchinese.app/medical-reader/{id}"
+
+## Data Accuracy
+- Dictionary entries are based on standard Mandarin Chinese usage
+- HSK vocabulary follows the official HSK examination standards
+- Grammar explanations are aligned with commonly accepted pedagogical approaches
+- Medical Chinese content is designed for language learning purposes only
+- Medical vocabulary and scenarios are not intended as medical advice
+- Content is regularly reviewed and updated for accuracy
+
+## Medical Chinese Disclaimer
+The Medical Chinese content on LearnChinese.app is intended solely for language learning and communication purposes. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult qualified healthcare providers for medical questions and emergencies.
+
+## Contact
+For corrections or inquiries: support@learnchinese.app
+
+## Last Updated
+January 2026
