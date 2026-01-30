@@ -8,6 +8,7 @@ const handleI18nRouting = createIntlMiddleware({
   locales: locales as unknown as string[],
   defaultLocale,
   localePrefix: 'always', // 所有语言都显示前缀
+  localeDetection: true, // 启用locale检测
 });
 
 /**
@@ -15,6 +16,11 @@ const handleI18nRouting = createIntlMiddleware({
  */
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  // 如果是根路径，先让 next-intl 处理重定向
+  if (pathname === '/') {
+    return handleI18nRouting(request);
+  }
 
   // 学习区保护的路径
   const protectedPaths = [
