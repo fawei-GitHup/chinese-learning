@@ -10,6 +10,9 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode
 }) {
+  console.log('=== MarketingLayout Rendering ===');
+  console.log('MarketingLayout component executed');
+  
   return (
     <div className="min-h-screen ink-bg-radial">
       {/* Top Navigation */}

@@ -16,6 +16,10 @@ const handleI18nRouting = createIntlMiddleware({
  */
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  
+  console.log('=== Middleware Debug ===');
+  console.log('Request URL:', request.url);
+  console.log('Pathname:', pathname);
 
   // 学习区保护的路径（不含locale前缀）
   const protectedPaths = [
@@ -36,15 +40,18 @@ export async function middleware(request: NextRequest) {
   // 提取pathname中去除locale前缀后的路径
   // pathname格式: /zh-CN/xxx 或 /en/xxx
   const pathnameWithoutLocale = pathname.replace(/^\/(zh-CN|en)(\/|$)/, '$2');
+  console.log('Pathname without locale:', pathnameWithoutLocale);
 
   // 检查当前路径是否需要认证（学习区）
   const isProtectedPath = protectedPaths.some(path => 
     pathnameWithoutLocale === path.slice(1) || // 匹配根路径如 "/dashboard" -> "dashboard"
     pathnameWithoutLocale.startsWith(path.slice(1) + '/') // 匹配子路径
   );
+  console.log('Is protected path:', isProtectedPath);
 
   // 如果是学习区，进行认证检查
   if (isProtectedPath) {
+    console.log('Processing protected path - checking authentication...');
     const response = handleI18nRouting(request);
     
     const supabase = createServerClient(
@@ -63,22 +70,29 @@ export async function middleware(request: NextRequest) {
     );
 
     const { data: { session } } = await supabase.auth.getSession();
+    console.log('Session exists:', !!session);
 
     if (!session) {
       // 提取locale
       const localeMatch = pathname.match(/^\/(zh-CN|en)/);
       const locale = localeMatch ? localeMatch[1] : defaultLocale;
       
-      const loginUrl = new URL(` /${locale}/login`, request.url);
+      const loginUrl = new URL(`/${locale}/login`, request.url);
       loginUrl.searchParams.set('redirect', pathname);
+      console.log('Redirecting to login:', loginUrl.toString());
       return NextResponse.redirect(loginUrl);
     }
 
+    console.log('Auth check passed, returning response');
     return response;
   }
 
   // 对于营销区和其他所有路径，使用 next-intl 中间件
-  return handleI18nRouting(request);
+  console.log('Processing marketing/public path - using i18n routing');
+  const i18nResponse = handleI18nRouting(request);
+  console.log('i18n routing completed');
+  console.log('=== Middleware End ===\n');
+  return i18nResponse;
 }
 
 export const config = {
