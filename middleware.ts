@@ -39,13 +39,13 @@ export async function middleware(request: NextRequest) {
 
   // 提取pathname中去除locale前缀后的路径
   // pathname格式: /zh-CN/xxx 或 /en/xxx
-  const pathnameWithoutLocale = pathname.replace(/^\/(zh-CN|en)(\/|$)/, '$2');
+  const pathnameWithoutLocale = pathname.replace(/^\/(zh-CN|en)/, '');
   console.log('Pathname without locale:', pathnameWithoutLocale);
 
   // 检查当前路径是否需要认证（学习区）
   const isProtectedPath = protectedPaths.some(path => 
-    pathnameWithoutLocale === path.slice(1) || // 匹配根路径如 "/dashboard" -> "dashboard"
-    pathnameWithoutLocale.startsWith(path.slice(1) + '/') // 匹配子路径
+    pathnameWithoutLocale === path || // 匹配根路径如 "/dashboard"
+    pathnameWithoutLocale.startsWith(path + '/') // 匹配子路径如 "/dashboard/xxx"
   );
   console.log('Is protected path:', isProtectedPath);
 
@@ -97,6 +97,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|_vercel).*)',
+    // 排除auth回调路径、API路由、静态资源等
+    '/((?!api|auth/callback|_next/static|_next/image|favicon.ico|.*\\..*|_vercel).*)',
   ],
 };
