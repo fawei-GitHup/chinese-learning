@@ -23,12 +23,17 @@ import {
 } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Medical Chinese | LearnChinese",
+  title: "Medical Chinese | Learn Chinese - Healthcare Communication",
   description:
-    "Learn Medical Chinese for healthcare communication. Master medical terminology, patient-doctor conversations, and clinical vocabulary.",
+    "Learn Medical Chinese for healthcare communication. Master medical terminology, patient-doctor conversations, and clinical vocabulary with interactive scenarios and comprehensive dictionary.",
+  keywords: ["medical Chinese", "healthcare communication", "medical vocabulary", "doctor patient dialogue", "Chinese medicine", "clinical Chinese"],
   openGraph: {
-    title: "Medical Chinese | LearnChinese",
-    description: "Master Medical Chinese for healthcare professionals and patients.",
+    title: "Medical Chinese | Learn Chinese - Healthcare Communication",
+    description: "Master Medical Chinese for healthcare professionals and patients with interactive learning tools.",
+    type: "website",
+  },
+  alternates: {
+    canonical: "/medical",
   },
 }
 
@@ -102,8 +107,91 @@ const featuredScenarios = medicalScenarios.slice(0, 6)
 
 export default function MedicalHubPage() {
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
+    <>
+      {/* SEO Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: "Medical Chinese Learning Hub",
+            description: "Comprehensive medical Chinese learning resources including vocabulary, scenarios, and grammar patterns.",
+            url: "https://learn-chinese.example.com/medical",
+            mainEntity: {
+              "@type": "ItemList",
+              name: "Medical Learning Resources",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Medical Vocabulary Dictionary",
+                  url: "https://learn-chinese.example.com/medical/vocabulary"
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Medical Conversation Scenarios",
+                  url: "https://learn-chinese.example.com/medical/scenarios"
+                },
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: "Registration Department",
+                  url: "https://learn-chinese.example.com/medical/registration"
+                },
+                {
+                  "@type": "ListItem",
+                  position: 4,
+                  name: "Triage Department",
+                  url: "https://learn-chinese.example.com/medical/triage"
+                },
+                {
+                  "@type": "ListItem",
+                  position: 5,
+                  name: "Consultation Department",
+                  url: "https://learn-chinese.example.com/medical/consultation"
+                }
+              ]
+            },
+            breadcrumb: {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: "https://learn-chinese.example.com/"
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Medical Chinese",
+                  item: "https://learn-chinese.example.com/medical"
+                }
+              ]
+            }
+          })
+        }}
+      />
+
+      <div className="min-h-screen">
+        {/* Breadcrumb Navigation */}
+        <nav className="px-6 py-4 border-b border-white/[0.06]" aria-label="Breadcrumb">
+          <div className="max-w-7xl mx-auto">
+            <ol className="flex items-center space-x-2 text-sm text-zinc-400">
+              <li>
+                <Link href="/" className="hover:text-white transition-colors">Home</Link>
+              </li>
+              <li className="flex items-center">
+                <ChevronRight className="h-4 w-4 mx-2" />
+                <span className="text-white font-medium">Medical Chinese</span>
+              </li>
+            </ol>
+          </div>
+        </nav>
+
+        {/* Hero Section */}
       <section className="relative py-20 px-6">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-teal-950/20 via-transparent to-transparent" />
         <div className="pointer-events-none absolute top-1/3 left-1/4 h-[400px] w-[600px] bg-teal-900/20 blur-[120px] rounded-full" />
@@ -218,8 +306,8 @@ export default function MedicalHubPage() {
               variant="outline"
               className="rounded-lg border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hidden sm:flex"
             >
-              <Link href="/login">
-                View All
+              <Link href="/medical/scenarios">
+                View All Scenarios
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Link>
             </Button>
@@ -231,7 +319,7 @@ export default function MedicalHubPage() {
               const Icon = cat?.icon || MessageSquare
 
               return (
-                <Link key={scenario.id} href="/login">
+                <Link key={scenario.id} href={`/medical/scenarios/${scenario.id}`}>
                   <GlassCard className="p-4 h-full hover:border-teal-500/30 transition-all group cursor-pointer">
                     <div className="flex items-center gap-3 mb-3">
                       <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${cat?.bgColor} ${cat?.borderColor} border`}>
@@ -266,7 +354,7 @@ export default function MedicalHubPage() {
               variant="outline"
               className="rounded-lg border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hidden sm:flex"
             >
-              <Link href="/login">
+              <Link href="/medical/vocabulary">
                 <BookOpen className="h-4 w-4 mr-2" />
                 Full Dictionary
               </Link>
@@ -275,7 +363,7 @@ export default function MedicalHubPage() {
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {topWords.map((word) => (
-              <Link key={word.id} href="/login">
+              <Link key={word.id} href={`/medical/dictionary/${word.id}`}>
                 <GlassCard className="p-3 hover:border-teal-500/30 transition-all group cursor-pointer">
                   <div className="flex items-baseline justify-between mb-1">
                     <span className="text-lg font-semibold text-white group-hover:text-teal-300 transition-colors">
@@ -358,6 +446,7 @@ export default function MedicalHubPage() {
           </GlassCard>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   )
 }

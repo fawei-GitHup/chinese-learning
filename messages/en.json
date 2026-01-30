@@ -1,0 +1,118 @@
+{
+  "nav": {
+    "home": "Home",
+    "medical": "Medical Chinese",
+    "placement": "Placement Test",
+    "login": "Login"
+  },
+  "hero": {
+    "title": "Master Medical Chinese, Enhance Your Professional Skills",
+    "subtitle": "A Chinese learning platform designed for medical professionals, covering clinical terminology, medical record writing, and doctor-patient communication",
+    "getStarted": "Get Started",
+    "learnMore": "Learn More"
+  },
+  "features": {
+    "title": "Why Choose Us",
+    "medicalFocused": {
+      "title": "Medical Focused",
+      "description": "Specialized Chinese learning content for the medical field"
+    },
+    "comprehensiveContent": {
+      "title": "Comprehensive Content",
+      "description": "From basic vocabulary to complex scenario dialogues"
+    },
+    "practicalApplication": {
+      "title": "Practical Application",
+      "description": "Real clinical scenario simulation exercises"
+    },
+    "personalizedLearning": {
+      "title": "Personalized Learning",
+      "description": "Customized learning path based on your level"
+    }
+  },
+  "medical": {
+    "hero": {
+      "title": "Medical Chinese Learning Center",
+      "subtitle": "Master Chinese communication skills in medical settings"
+    },
+    "vocabulary": {
+      "title": "Medical Vocabulary",
+      "description": "Learn commonly used medical terms and expressions",
+      "viewAll": "View All Vocabulary"
+    },
+    "scenarios": {
+      "title": "Clinical Scenarios",
+      "description": "Practice doctor-patient dialogues in real scenarios",
+      "viewAll": "View All Scenarios"
+    },
+    "reading": {
+      "title": "Medical Reading",
+      "description": "Improve medical literature reading skills",
+      "viewAll": "View All Reading Materials"
+    }
+  },
+  "medicalVocabulary": {
+    "title": "Medical Vocabulary Library",
+    "subtitle": "Master professional terminology in medical scenarios",
+    "searchPlaceholder": "Search vocabulary...",
+    "filterByCategory": "Filter by Category",
+    "allCategories": "All Categories",
+    "anatomy": "Anatomy",
+    "symptoms": "Symptoms",
+    "diseases": "Diseases",
+    "treatments": "Treatments",
+    "medications": "Medications",
+    "equipment": "Equipment",
+    "procedures": "Procedures",
+    "pinyin": "Pinyin",
+    "definition": "Definition",
+    "example": "Example",
+    "vocabularyCount": "vocabulary items"
+  },
+  "scenarios": {
+    "title": "Clinical Scenario Dialogues",
+    "subtitle": "Practice Chinese dialogues in real medical scenarios",
+    "searchPlaceholder": "Search scenarios...",
+    "filterByDifficulty": "Filter by Difficulty",
+    "allDifficulties": "All Difficulties",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "scenariosCount": "scenarios",
+    "startLearning": "Start Learning"
+  },
+  "scenarioDetail": {
+    "overview": "Scenario Overview",
+    "vocabulary": "Key Vocabulary",
+    "dialogue": "Dialogue Content",
+    "notes": "Learning Points",
+    "practice": "Start Practice",
+    "backToScenarios": "Back to Scenarios"
+  },
+  "login": {
+    "title": "Login",
+    "subtitle": "Login to access full learning content",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Login",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign Up",
+    "orContinueWith": "Or continue with",
+    "emailPlaceholder": "your@email.com",
+    "passwordPlaceholder": "••••••••"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort"
+  }
+}

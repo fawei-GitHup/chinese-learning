@@ -1,10 +1,8 @@
 "use client"
 
-
 import React from "react"
-import Head from "next/head"
-
 import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { GlassCard } from "@/components/web/GlassCard"
 import { OAuthButtons } from "@/components/web/auth/OAuthButtons"
@@ -29,7 +27,10 @@ const benefits = [
   },
 ]
 
-export default function LoginPage() {
+export function LoginPageClient() {
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get("redirect") || "/dashboard"
+  
   const [email, setEmail] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
@@ -45,9 +46,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-6 py-12">
-      <Head>
-        <meta name="robots" content="noindex,nofollow" />
-      </Head>
       {/* Background effects - inkwash style */}
       <div className="pointer-events-none fixed inset-0 bg-gradient-to-br from-red-950/20 via-transparent to-purple-950/10" />
       <div className="pointer-events-none fixed top-1/4 left-1/4 h-96 w-96 bg-red-900/10 blur-[120px] rounded-full" />
@@ -110,7 +108,7 @@ export default function LoginPage() {
             </div>
 
             {/* OAuth Buttons */}
-            <OAuthButtons />
+            <OAuthButtons redirectPath={redirectPath} />
 
             {/* Terms */}
             <p className="mt-6 text-center text-xs text-zinc-600">

@@ -2,6 +2,8 @@ import React from "react"
 import Link from "next/link"
 import { BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { LanguageSwitcher } from "@/components/web/LanguageSwitcher"
+import { FeedbackButton } from "@/components/feedback/FeedbackButton"
 
 export default function MarketingLayout({
   children,
@@ -53,6 +55,7 @@ export default function MarketingLayout({
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <Button
               asChild
               variant="ghost"
@@ -122,6 +125,9 @@ export default function MarketingLayout({
           </div>
         </div>
       </footer>
+
+      {/* 反馈按钮 */}
+      <FeedbackButton />
     </div>
   )
 }

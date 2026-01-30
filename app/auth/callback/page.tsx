@@ -1,37 +1,50 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createBrowserClient } from '@supabase/ssr'
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { createBrowserClient } from '@/lib/supabase/client'
 import { Spinner } from '@/components/ui/spinner'
 import { GlassCard } from '@/components/web/GlassCard'
 
-export default function CallbackPage() {
+function CallbackPageContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // 从 URL 参数获取 redirect 路径，默认为 /dashboard
+  const redirectPath = searchParams.get('redirect') || '/dashboard'
 
   useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const handleAuthCallback = async () => {
+      try {
+        const supabase = createBrowserClient()
 
-    supabase.auth.getSession().then(({ data: { session }, error: sessionError }) => {
-      setLoading(false)
-      if (session) {
-        router.push('/dashboard')
-      } else {
-        const errorMsg = sessionError?.message || 'Authentication failed'
-        setError(errorMsg)
+        // 获取当前 session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        setLoading(false)
+        
+        if (session) {
+          // 登录成功，跳转到指定页面
+          router.push(redirectPath)
+        } else {
+          // 如果没有 session，可能需要交换 code
+          // Supabase 在某些情况下会自动处理，但如果失败则显示错误
+          const errorMsg = sessionError?.message || 'Authentication failed. Please try again.'
+          setError(errorMsg)
+          setTimeout(() => router.push('/login'), 3000)
+        }
+      } catch (err) {
+        setLoading(false)
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+        setError('Failed to complete authentication: ' + errorMessage)
         setTimeout(() => router.push('/login'), 3000)
       }
-    }).catch((err) => {
-      setLoading(false)
-      setError('Failed to get session: ' + err.message)
-      setTimeout(() => router.push('/login'), 3000)
-    })
-  }, [router])
+    }
+
+    handleAuthCallback()
+  }, [router, redirectPath])
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 ink-bg">
@@ -59,5 +72,21 @@ export default function CallbackPage() {
         </GlassCard>
       )}
     </div>
+  )
+}
+
+export default function CallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center p-4 ink-bg">
+        <div className="absolute inset-0 bg-gradient-to-br from-red-950/20 via-transparent to-purple-950/10 pointer-events-none" />
+        <div className="flex flex-col items-center gap-4">
+          <Spinner className="size-8 text-red-400" />
+          <p className="text-white text-sm">正在验证登录...</p>
+        </div>
+      </div>
+    }>
+      <CallbackPageContent />
+    </Suspense>
   )
 }

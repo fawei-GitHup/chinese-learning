@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
+import useSWR from "swr"
 import { GlassCard } from "@/components/web/GlassCard"
 import { TabsBar } from "@/components/web/TabsBar"
 import { FilterBarLite } from "@/components/web/FilterBarLite"
@@ -20,6 +21,7 @@ import {
   Sparkles,
   Target,
   Award,
+  Lightbulb,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -40,6 +42,19 @@ export default function PathPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [tagFilter, setTagFilter] = useState("all")
   const [progress] = useState(mockProgress)
+
+  // 获取个性化推荐（基于当前级别）
+  const {
+    data: recommendations,
+    error: recError,
+    isLoading: recLoading
+  } = useSWR(
+    `path-recommendations-${activeLevel}`,
+    async () => {
+      const { getPathRecommendations } = await import('@/lib/recommendations')
+      return getPathRecommendations(activeLevel, 4)
+    }
+  )
 
   const currentLevelData = pathLevels.find((l) => l.level === activeLevel)
   const currentItems = itemsByLevel[activeLevel]
@@ -93,7 +108,7 @@ export default function PathPage() {
       </div>
 
       {/* Level Overview */}
-      <GlassCard glowColor="cyan">
+      <GlassCard>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-2">
@@ -123,7 +138,7 @@ export default function PathPage() {
 
       {/* Continue Card */}
       {nextItem && (
-        <GlassCard glowColor="emerald">
+        <GlassCard>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/20">
@@ -142,6 +157,48 @@ export default function PathPage() {
             </Link>
           </div>
         </GlassCard>
+      )}
+
+      {/* 智能推荐区块 */}
+      {!recLoading && recommendations && recommendations.length > 0 && (
+        <div>
+          <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
+            <Lightbulb className="h-5 w-5 text-amber-400" />
+            智能推荐（基于您的学习进度）
+          </h3>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {recommendations.map((rec) => {
+              const Icon = rec.content.type === 'lesson' ? BookOpen : FileText
+              const colorClass = rec.content.type === 'lesson' ? 'text-amber-400' : 'text-rose-400'
+              const bgClass = rec.content.type === 'lesson' ? 'bg-amber-500/20' : 'bg-rose-500/20'
+              const href = rec.content.type === 'lesson' ? `/lesson/${rec.content.id}` : `/reader/${rec.content.id}`
+              
+              return (
+                <Link key={rec.content.id} href={href}>
+                  <GlassCard className="group h-full cursor-pointer transition-all hover:border-amber-500/30">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", bgClass)}>
+                        <Icon className={cn("h-4 w-4", colorClass)} />
+                      </div>
+                      <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-xs text-cyan-400">
+                        {rec.score.total.toFixed(0)}分
+                      </span>
+                    </div>
+                    <h4 className="font-medium text-white mb-2 group-hover:text-amber-400 transition-colors line-clamp-1">
+                      {rec.content.title}
+                    </h4>
+                    <p className="text-xs text-zinc-500 mb-2 line-clamp-2">
+                      {rec.content.description}
+                    </p>
+                    <div className="text-xs text-amber-400/80">
+                      💡 {rec.reason}
+                    </div>
+                  </GlassCard>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
       )}
 
       {/* Milestones */}

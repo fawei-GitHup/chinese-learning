@@ -1,24 +1,22 @@
 "use client"
 
-import React from "react"
-
-import { useState, useCallback, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { GlassCard } from "@/components/web/GlassCard"
 import { Button } from "@/components/ui/button"
-import { readers, mockGrammarPoints, type ReaderToken } from "@/lib/web-mock"
+import { ReaderVocabularyList } from "@/components/web/reader/ReaderVocabularyList"
 import { usePreferences } from "@/lib/preferences-store"
+import { getContentBySlug, type ReadingContent } from "@/lib/content"
+import { markComplete, getProgress, updateProgress } from "@/lib/progress/api"
+import { useToast } from "@/hooks/use-toast"
 import {
   ArrowLeft,
   Eye,
   EyeOff,
   Type,
-  Plus,
-  Check,
-  BookOpen,
   Sparkles,
-  ChevronRight,
-  X,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -35,40 +33,104 @@ export default function ReaderPage() {
   const params = useParams()
   const router = useRouter()
   const readerId = params.id as string
+  const { toast } = useToast()
+  const contentRef = useRef<HTMLDivElement>(null)
 
-  const reader = readers.find((r) => r.id === readerId)
+  const [reading, setReading] = useState<ReadingContent | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Use shared preferences store
   const preferences = usePreferences()
   const [showPinyin, setShowPinyin] = useState(preferences.showPinyin)
   const [showTranslation, setShowTranslation] = useState(preferences.showTranslation)
-  const [fontSize, setFontSize] = useState<FontSize>(preferences.fontSize)
-  
+  const [fontSize, setFontSize] = useState<FontSize>("medium")
+
+  const [addedToSrs, setAddedToSrs] = useState<Set<string>>(new Set())
+  const [isCompleted, setIsCompleted] = useState(false)
+  const [loadingProgress, setLoadingProgress] = useState(false)
+  const [readingProgress, setReadingProgress] = useState(0)
+
   // Sync local state with preferences store on mount
   useEffect(() => {
     setShowPinyin(preferences.showPinyin)
     setShowTranslation(preferences.showTranslation)
-    setFontSize(preferences.fontSize)
-  }, [preferences.showPinyin, preferences.showTranslation, preferences.fontSize])
-  const [selectedToken, setSelectedToken] = useState<ReaderToken | null>(null)
-  const [popoverPosition, setPopoverPosition] = useState<{ x: number; y: number } | null>(null)
-  const [addedToSrs, setAddedToSrs] = useState<Set<string>>(new Set())
+  }, [preferences.showPinyin, preferences.showTranslation])
 
-  const handleTokenClick = useCallback((token: ReaderToken, event: React.MouseEvent) => {
-    const rect = (event.target as HTMLElement).getBoundingClientRect()
-    setPopoverPosition({ x: rect.left, y: rect.bottom + 8 })
-    setSelectedToken(token)
-  }, [])
+  // Load reading data and progress
+  useEffect(() => {
+    const loadReading = async () => {
+      try {
+        setLoading(true)
+        const result = await getContentBySlug('reading', readerId)
+        if (result.error) {
+          setError(result.error.message)
+        } else if (result.data) {
+          setReading(result.data as ReadingContent)
+          
+          // Load progress
+          const progress = await getProgress('reading', readerId)
+          if (progress) {
+            setIsCompleted(progress.completed)
+            setReadingProgress(progress.progress_percentage)
+            // 恢复阅读位置
+            if (progress.last_position?.scrollPosition) {
+              setTimeout(() => {
+                window.scrollTo(0, progress.last_position.scrollPosition)
+              }, 100)
+            }
+          }
+        } else {
+          setError('Reading not found')
+        }
+      } catch (err) {
+        setError('Failed to load reading')
+        console.error('Error loading reading:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const handleClosePopover = useCallback(() => {
-    setSelectedToken(null)
-    setPopoverPosition(null)
-  }, [])
+    if (readerId) {
+      loadReading()
+    }
+  }, [readerId])
 
-  const handleAddToSrs = useCallback((token: ReaderToken) => {
-    setAddedToSrs((prev) => new Set([...prev, token.word]))
-    handleClosePopover()
-  }, [handleClosePopover])
+  // 追踪滚动进度
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!contentRef.current || isCompleted) return
+
+      const windowHeight = window.innerHeight
+      const documentHeight = document.documentElement.scrollHeight
+      const scrollTop = window.scrollY
+      const scrollPercentage = Math.min(
+        100,
+        Math.round((scrollTop / (documentHeight - windowHeight)) * 100)
+      )
+
+      if (scrollPercentage !== readingProgress && scrollPercentage > readingProgress) {
+        setReadingProgress(scrollPercentage)
+        
+        // 保存进度（防抖，每 5% 保存一次）
+        if (scrollPercentage % 5 === 0 || scrollPercentage === 100) {
+          updateProgress('reading', readerId, scrollPercentage, {
+            scrollPosition: scrollTop,
+            timestamp: Date.now(),
+          }).catch((error) => {
+            console.error('Failed to update reading progress:', error)
+          })
+        }
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [readerId, readingProgress, isCompleted])
+
+  const handleAddToSrs = (wordId: string) => {
+    setAddedToSrs((prev) => new Set([...prev, wordId]))
+  }
 
   const cycleFontSize = () => {
     const sizes: FontSize[] = ["small", "medium", "large"]
@@ -76,95 +138,49 @@ export default function ReaderPage() {
     setFontSize(sizes[(currentIndex + 1) % sizes.length])
   }
 
-  if (!reader) {
+  const handleComplete = async () => {
+    setLoadingProgress(true)
+    try {
+      await markComplete('reading', readerId)
+      setIsCompleted(true)
+      toast({
+        title: "阅读已完成！",
+        description: "您的学习进度已保存。",
+      })
+    } catch (error) {
+      console.error('Failed to mark complete:', error)
+      toast({
+        title: "保存失败",
+        description: "无法保存您的进度，请稍后重试。",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingProgress(false)
+    }
+  }
+
+  if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <GlassCard className="text-center">
-          <p className="text-zinc-400">Reader not found</p>
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-400 mx-auto mb-4" />
+          <p className="text-zinc-400">Loading reading...</p>
+        </GlassCard>
+      </div>
+    )
+  }
+
+  if (error || !reading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <GlassCard className="text-center">
+          <p className="text-zinc-400">{error || 'Reading not found'}</p>
           <Link href="/path">
             <Button className="mt-4">Back to Path</Button>
           </Link>
         </GlassCard>
       </div>
     )
-  }
-
-  // Create a lookup map for tokens
-  const tokenMap = new Map(reader.tokens.map((t) => [t.word, t]))
-
-  // Function to render text with clickable tokens
-  const renderParagraphWithTokens = (text: string, paragraphIndex: number) => {
-    const elements: React.ReactNode[] = []
-    let lastIndex = 0
-
-    // Sort tokens by length (longest first) to match longer words first
-    const sortedTokens = [...reader.tokens].sort((a, b) => b.word.length - a.word.length)
-
-    // Find all token positions in this text
-    const matches: { start: number; end: number; token: ReaderToken }[] = []
-    for (const token of sortedTokens) {
-      let searchIndex = 0
-      while (true) {
-        const foundIndex = text.indexOf(token.word, searchIndex)
-        if (foundIndex === -1) break
-        // Check if this position is already covered by a longer match
-        const overlaps = matches.some(
-          (m) => foundIndex >= m.start && foundIndex < m.end
-        )
-        if (!overlaps) {
-          matches.push({
-            start: foundIndex,
-            end: foundIndex + token.word.length,
-            token,
-          })
-        }
-        searchIndex = foundIndex + 1
-      }
-    }
-
-    // Sort matches by start position
-    matches.sort((a, b) => a.start - b.start)
-
-    // Build elements
-    for (const match of matches) {
-      // Add text before this match
-      if (match.start > lastIndex) {
-        elements.push(
-          <span key={`text-${paragraphIndex}-${lastIndex}`}>
-            {text.slice(lastIndex, match.start)}
-          </span>
-        )
-      }
-      // Add the clickable token
-      const isSelected = selectedToken?.word === match.token.word
-      const isAdded = addedToSrs.has(match.token.word)
-      elements.push(
-        <span
-          key={`token-${paragraphIndex}-${match.start}`}
-          onClick={(e) => handleTokenClick(match.token, e)}
-          className={cn(
-            "cursor-pointer rounded px-0.5 transition-all",
-            isSelected
-              ? "bg-cyan-500/30 text-cyan-300"
-              : isAdded
-                ? "bg-emerald-500/20 text-emerald-300"
-                : "hover:bg-cyan-500/20 hover:text-cyan-300"
-          )}
-        >
-          {match.token.word}
-        </span>
-      )
-      lastIndex = match.end
-    }
-
-    // Add remaining text
-    if (lastIndex < text.length) {
-      elements.push(
-        <span key={`text-${paragraphIndex}-end`}>{text.slice(lastIndex)}</span>
-      )
-    }
-
-    return elements
   }
 
   return (
@@ -181,18 +197,18 @@ export default function ReaderPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="rounded-lg bg-rose-500/20 px-2 py-1 text-xs font-medium text-rose-400">
-                {reader.level}
+                {reading.level}
               </span>
-              <span className="text-sm text-zinc-500">{reader.wordCount} words</span>
+              <span className="text-sm text-zinc-500">{reading.wordCount} words</span>
             </div>
-            <h1 className="mt-2 text-2xl font-bold text-white">{reader.title}</h1>
-            <p className="mt-1 text-zinc-400">{reader.summary}</p>
+            <h1 className="mt-2 text-2xl font-bold text-white">{reading.title}</h1>
+            <p className="mt-1 text-zinc-400">{reading.description}</p>
           </div>
         </div>
       </div>
 
       {/* Glass Toolbar */}
-      <GlassCard className="mb-6 sticky top-4 z-20">
+      <GlassCard className="mb-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <button
@@ -229,7 +245,7 @@ export default function ReaderPage() {
           </div>
           <div className="flex items-center gap-2 text-sm text-zinc-500">
             <Sparkles className="h-4 w-4 text-cyan-400" />
-            <span>Click any word to look up</span>
+            <span>Learn by reading</span>
           </div>
         </div>
       </GlassCard>
@@ -237,155 +253,78 @@ export default function ReaderPage() {
       {/* Main Content */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Reading Area */}
-        <div className="lg:col-span-2">
-          <GlassCard glowColor="rose" className="relative">
+        <div className="lg:col-span-2 space-y-4">
+          <GlassCard className="relative" ref={contentRef}>
             <div className="space-y-8">
-              {reader.paragraphs.map((paragraph, pIdx) => (
+              {reading.content.map((paragraph, pIdx) => (
                 <div key={pIdx} className="group">
-                  {/* Chinese text with clickable tokens */}
                   <p className={cn("text-white", fontSizeClasses[fontSize])}>
-                    {renderParagraphWithTokens(paragraph.zh, pIdx)}
+                    {paragraph}
                   </p>
-                  {/* Pinyin */}
-                  {showPinyin && paragraph.pinyin && (
-                    <p className="mt-2 text-sm text-cyan-400/80">{paragraph.pinyin}</p>
+                  {showPinyin && (
+                    <p className="mt-2 text-sm text-cyan-400/80">
+                      {/* For demo, we don't have pinyin per paragraph, so just show placeholder */}
+                      [Pinyin would go here]
+                    </p>
                   )}
-                  {/* Translation */}
-                  {showTranslation && paragraph.en && (
-                    <p className="mt-2 text-sm text-zinc-500">{paragraph.en}</p>
+                  {showTranslation && (
+                    <p className="mt-2 text-sm text-zinc-500">
+                      {/* For demo, we don't have translation per paragraph */}
+                      [Translation would go here]
+                    </p>
                   )}
                 </div>
               ))}
             </div>
           </GlassCard>
 
-          {/* Related Grammar */}
-          <div className="mt-6">
-            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
-              <BookOpen className="h-5 w-5 text-amber-400" />
-              Related Grammar
-            </h3>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {mockGrammarPoints.slice(0, 4).map((point) => (
-                <GlassCard key={point.id} className="group cursor-pointer hover:border-amber-500/30 transition-all">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-white group-hover:text-amber-400 transition-colors">
-                        {point.title}
-                      </p>
-                      <p className="text-sm text-zinc-500">{point.category}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-zinc-600 group-hover:text-amber-400" />
-                  </div>
-                </GlassCard>
-              ))}
+          {/* 进度和完成按钮 */}
+          <GlassCard>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-zinc-400">阅读进度</span>
+                <span className="font-medium text-cyan-400">{readingProgress}%</span>
+              </div>
+              <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300"
+                  style={{ width: `${readingProgress}%` }}
+                />
+              </div>
+              {!isCompleted ? (
+                <Button
+                  onClick={handleComplete}
+                  disabled={loadingProgress}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600"
+                >
+                  {loadingProgress ? (
+                    <>加载中...</>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      标记为已完成
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <div className="rounded-xl bg-emerald-500/20 p-3 text-center">
+                  <CheckCircle2 className="mx-auto h-6 w-6 text-emerald-400" />
+                  <p className="mt-1 text-sm font-medium text-emerald-400">阅读已完成！</p>
+                </div>
+              )}
             </div>
-          </div>
+          </GlassCard>
         </div>
 
-        {/* Right Side - Word Card */}
-        <div className="space-y-4">
-          <GlassCard className="sticky top-32">
-            <h3 className="mb-4 font-semibold text-white">Word Card</h3>
-            {selectedToken ? (
-              <div className="space-y-4">
-                <div className="text-center">
-                  <p className="text-4xl font-bold text-white">{selectedToken.word}</p>
-                  <p className="mt-2 text-lg text-cyan-400">{selectedToken.pinyin}</p>
-                </div>
-                <div className="rounded-xl bg-white/5 p-4">
-                  <p className="text-sm text-zinc-500">Meaning</p>
-                  <p className="mt-1 text-white">{selectedToken.meaning}</p>
-                </div>
-                <div className="rounded-xl bg-white/5 p-4">
-                  <p className="text-sm text-zinc-500">Key Points</p>
-                  <ul className="mt-2 space-y-1 text-sm text-zinc-300">
-                    <li>• Common in daily conversation</li>
-                    <li>• Can be used as noun or verb</li>
-                  </ul>
-                </div>
-                {!addedToSrs.has(selectedToken.word) ? (
-                  <Button
-                    onClick={() => handleAddToSrs(selectedToken)}
-                    className="w-full bg-cyan-500 hover:bg-cyan-600"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add to SRS
-                  </Button>
-                ) : (
-                  <div className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/20 py-3 text-emerald-400">
-                    <Check className="h-4 w-4" />
-                    Added to SRS
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="py-8 text-center text-zinc-500">
-                <BookOpen className="mx-auto h-12 w-12 text-zinc-700" />
-                <p className="mt-4">Click on a word in the text to see its definition</p>
-              </div>
-            )}
-          </GlassCard>
-
-          {/* Progress Stats */}
-          <GlassCard>
-            <h3 className="mb-4 font-semibold text-white">Reading Stats</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-xl bg-white/5 p-3 text-center">
-                <p className="text-2xl font-bold text-white">{addedToSrs.size}</p>
-                <p className="text-xs text-zinc-500">Words Saved</p>
-              </div>
-              <div className="rounded-xl bg-white/5 p-3 text-center">
-                <p className="text-2xl font-bold text-white">{reader.tokens.length}</p>
-                <p className="text-xs text-zinc-500">Key Terms</p>
-              </div>
-            </div>
-          </GlassCard>
+        {/* Right Side - Vocabulary List */}
+        <div className="space-y-6">
+          <ReaderVocabularyList
+            vocabularyList={reading.vocabulary_list}
+            onAddToSrs={handleAddToSrs}
+            addedWords={addedToSrs}
+          />
         </div>
       </div>
-
-      {/* Floating Popover for word lookup */}
-      {selectedToken && popoverPosition && (
-        <div
-          className="fixed z-50 w-72 animate-in fade-in slide-in-from-top-2"
-          style={{
-            left: Math.min(popoverPosition.x, window.innerWidth - 300),
-            top: popoverPosition.y,
-          }}
-        >
-          <GlassCard glowColor="cyan" className="relative">
-            <button
-              onClick={handleClosePopover}
-              className="absolute right-2 top-2 rounded-lg p-1 text-zinc-400 hover:bg-white/10 hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            <div className="pr-6">
-              <p className="text-2xl font-bold text-white">{selectedToken.word}</p>
-              <p className="text-cyan-400">{selectedToken.pinyin}</p>
-              <p className="mt-2 text-sm text-zinc-300">{selectedToken.meaning}</p>
-            </div>
-            {!addedToSrs.has(selectedToken.word) && (
-              <Button
-                size="sm"
-                onClick={() => handleAddToSrs(selectedToken)}
-                className="mt-3 w-full bg-cyan-500 hover:bg-cyan-600"
-              >
-                <Plus className="mr-1 h-3 w-3" />
-                Add to SRS
-              </Button>
-            )}
-          </GlassCard>
-        </div>
-      )}
-
-      {/* Click outside to close popover */}
-      {selectedToken && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={handleClosePopover}
-        />
-      )}
     </div>
   )
 }

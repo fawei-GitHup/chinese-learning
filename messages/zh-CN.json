@@ -1,0 +1,118 @@
+{
+  "nav": {
+    "home": "首页",
+    "medical": "医疗汉语",
+    "placement": "水平测试",
+    "login": "登录"
+  },
+  "hero": {
+    "title": "掌握医疗汉语，提升职业能力",
+    "subtitle": "专为医疗从业者设计的中文学习平台，涵盖临床术语、病历写作和医患沟通",
+    "getStarted": "开始学习",
+    "learnMore": "了解更多"
+  },
+  "features": {
+    "title": "为什么选择我们",
+    "medicalFocused": {
+      "title": "医疗专业",
+      "description": "专注于医疗领域的中文学习内容"
+    },
+    "comprehensiveContent": {
+      "title": "全面内容",
+      "description": "从基础词汇到复杂场景对话"
+    },
+    "practicalApplication": {
+      "title": "实用应用",
+      "description": "真实临床场景模拟练习"
+    },
+    "personalizedLearning": {
+      "title": "个性化学习",
+      "description": "根据您的水平定制学习路径"
+    }
+  },
+  "medical": {
+    "hero": {
+      "title": "医疗汉语学习中心",
+      "subtitle": "掌握医疗场景下的中文沟通技能"
+    },
+    "vocabulary": {
+      "title": "医疗词汇",
+      "description": "学习常用的医疗术语和表达",
+      "viewAll": "查看所有词汇"
+    },
+    "scenarios": {
+      "title": "临床场景",
+      "description": "在真实场景中练习医患对话",
+      "viewAll": "查看所有场景"
+    },
+    "reading": {
+      "title": "医学阅读",
+      "description": "提升医疗文献阅读能力",
+      "viewAll": "查看所有阅读材料"
+    }
+  },
+  "medicalVocabulary": {
+    "title": "医疗词汇库",
+    "subtitle": "掌握医疗场景中的专业术语",
+    "searchPlaceholder": "搜索词汇...",
+    "filterByCategory": "按分类筛选",
+    "allCategories": "所有分类",
+    "anatomy": "解剖学",
+    "symptoms": "症状",
+    "diseases": "疾病",
+    "treatments": "治疗",
+    "medications": "药物",
+    "equipment": "设备",
+    "procedures": "操作程序",
+    "pinyin": "拼音",
+    "definition": "定义",
+    "example": "例句",
+    "vocabularyCount": "个词汇"
+  },
+  "scenarios": {
+    "title": "临床场景对话",
+    "subtitle": "在真实医疗场景中练习中文对话",
+    "searchPlaceholder": "搜索场景...",
+    "filterByDifficulty": "按难度筛选",
+    "allDifficulties": "所有难度",
+    "beginner": "初级",
+    "intermediate": "中级",
+    "advanced": "高级",
+    "scenariosCount": "个场景",
+    "startLearning": "开始学习"
+  },
+  "scenarioDetail": {
+    "overview": "场景概述",
+    "vocabulary": "关键词汇",
+    "dialogue": "对话内容",
+    "notes": "学习要点",
+    "practice": "开始练习",
+    "backToScenarios": "返回场景列表"
+  },
+  "login": {
+    "title": "登录",
+    "subtitle": "登录以访问完整的学习内容",
+    "email": "邮箱",
+    "password": "密码",
+    "loginButton": "登录",
+    "noAccount": "还没有账号？",
+    "signUp": "注册",
+    "orContinueWith": "或使用以下方式继续",
+    "emailPlaceholder": "your@email.com",
+    "passwordPlaceholder": "••••••••"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "retry": "重试",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "search": "搜索",
+    "filter": "筛选",
+    "sort": "排序"
+  }
+}

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { Search, Flame, Moon, Sun, Menu, X, BookOpen, ChevronDown, LogOut, User } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
   Route,
@@ -41,8 +41,30 @@ interface WebTopbarProps {
 export function WebTopbar({ streakDays = 42, className }: WebTopbarProps) {
   const [isDark, setIsDark] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const pathname = usePathname()
-  const { session, signOut } = useAuth()
+  const router = useRouter()
+  const { session, user, signOut } = useAuth()
+  
+  // 获取用户首字母缩写用于头像显示
+  const getUserInitials = () => {
+    if (!user?.email) return 'U'
+    const email = user.email
+    return email.substring(0, 2).toUpperCase()
+  }
+
+  // Handle search
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
 
   return (
     <>
@@ -61,14 +83,31 @@ export function WebTopbar({ streakDays = 42, className }: WebTopbarProps) {
             <Menu className="h-5 w-5" />
           </button>
 
-          {/* Mobile logo */}
-          <div className="flex items-center gap-2 lg:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-700 to-red-900">
-              <BookOpen className="h-4 w-4 text-red-100" />
+          {/* Mobile logo and search */}
+          <div className="flex items-center gap-2 lg:hidden flex-1">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-700 to-red-900">
+                <BookOpen className="h-4 w-4 text-red-100" />
+              </div>
+              <span className="font-bold text-white">
+                <span className="text-red-400">Learn</span>Chinese
+              </span>
             </div>
-            <span className="font-bold text-white">
-              <span className="text-red-400">Learn</span>Chinese
-            </span>
+
+            {/* Mobile search */}
+            <div className="flex-1 max-w-48 ml-2">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-zinc-600" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full rounded-md border border-white/[0.08] bg-white/[0.03] py-1 pl-6 pr-2 text-xs text-white placeholder:text-zinc-600 focus:border-red-800/50 focus:outline-none focus:ring-1 focus:ring-red-800/50 transition-all"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Search */}
@@ -78,6 +117,9 @@ export function WebTopbar({ streakDays = 42, className }: WebTopbarProps) {
               <input
                 type="text"
                 placeholder="Search lessons, words, grammar..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] py-2 pl-10 pr-4 text-sm text-white placeholder:text-zinc-600 focus:border-red-800/50 focus:outline-none focus:ring-1 focus:ring-red-800/50 transition-all"
               />
             </div>
@@ -103,12 +145,12 @@ export function WebTopbar({ streakDays = 42, className }: WebTopbarProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-1 h-9 rounded-lg bg-gradient-to-br from-red-700 to-red-900 px-3 text-sm font-medium text-red-100 shadow-[0_0_15px_rgba(197,48,48,0.25)]">
-                  AC
+                  {getUserInitials()}
                   <ChevronDown className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>{session?.user?.email}</DropdownMenuLabel>
+                <DropdownMenuLabel>{user?.email || 'Guest'}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/account" className="flex items-center">

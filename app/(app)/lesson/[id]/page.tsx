@@ -6,8 +6,12 @@ import { useState, useMemo, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { GlassCard } from "@/components/web/GlassCard"
 import { Button } from "@/components/ui/button"
-import { lessons, srsQueue, type VocabWord, type SrsCard } from "@/lib/web-mock"
+import { ErrorDisplay } from "@/components/web/ErrorDisplay"
+import { AddToSRSButton } from "@/components/srs/AddToSRSButton"
+import { getContentBySlug, type FullLessonContent, type ContentDetailResult } from "@/lib/content"
 import { usePreferences } from "@/lib/preferences-store"
+import { markComplete, getProgress, updateProgress } from "@/lib/progress/api"
+import { useToast } from "@/hooks/use-toast"
 import {
   ArrowLeft,
   Clock,
@@ -15,12 +19,12 @@ import {
   Headphones,
   PenTool,
   CheckCircle2,
-  Plus,
   Eye,
   EyeOff,
   Volume2,
   Check,
   ChevronRight,
+  BookmarkPlus,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
@@ -38,61 +42,201 @@ export default function LessonPage() {
   const params = useParams()
   const router = useRouter()
   const lessonId = params.id as string
+  const { toast } = useToast()
 
-  const lesson = lessons.find((l) => l.id === lessonId)
+  const [result, setResult] = useState<ContentDetailResult | null>(null)
+  const [loading, setLoading] = useState(true)
 
   // Use shared preferences store
   const preferences = usePreferences()
-  
+
   const [currentStep, setCurrentStep] = useState<LessonStep>("preview")
   const [showPinyin, setShowPinyin] = useState(preferences.showPinyin)
   const [showTranslation, setShowTranslation] = useState(preferences.showTranslation)
   const [addedToSrs, setAddedToSrs] = useState<Set<string>>(new Set())
-  
+  const [markedKnown, setMarkedKnown] = useState<Set<string>>(new Set())
+  const [isCompleted, setIsCompleted] = useState(false)
+  const [bookmarked, setBookmarked] = useState(false)
+  const [loadingProgress, setLoadingProgress] = useState(false)
+
+  // Load lesson data and progress
+  useEffect(() => {
+    const loadLesson = async () => {
+      setLoading(true)
+      try {
+        const response = await getContentBySlug('lesson', lessonId)
+        setResult(response)
+        
+        // Load progress
+        const progress = await getProgress('lesson', lessonId)
+        if (progress) {
+          setIsCompleted(progress.completed)
+        }
+      } catch (error) {
+        console.error('Failed to load lesson:', error)
+        setResult({
+          data: null,
+          error: error instanceof Error ? error : new Error('Unknown error')
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadLesson()
+  }, [lessonId])
+
   // Sync local state with preferences store on mount
   useEffect(() => {
     setShowPinyin(preferences.showPinyin)
     setShowTranslation(preferences.showTranslation)
   }, [preferences.showPinyin, preferences.showTranslation])
-  const [markedKnown, setMarkedKnown] = useState<Set<string>>(new Set())
-  const [isCompleted, setIsCompleted] = useState(false)
+
+  const lesson = result?.data as FullLessonContent | null
 
   const currentStepIndex = stepConfig.findIndex((s) => s.id === currentStep)
 
-  const handleAddToSrs = (word: VocabWord) => {
+  const handleAddToSrs = (word: any) => {
     setAddedToSrs((prev) => new Set([...prev, word.word]))
   }
 
-  const handleMarkKnown = (word: VocabWord) => {
+  const handleMarkKnown = (word: any) => {
     setMarkedKnown((prev) => new Set([...prev, word.word]))
   }
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     const nextIndex = currentStepIndex + 1
     if (nextIndex < stepConfig.length) {
       setCurrentStep(stepConfig[nextIndex].id)
+      // 更新进度百分比
+      const percentage = ((nextIndex + 1) / stepConfig.length) * 100
+      try {
+        await updateProgress('lesson', lessonId, Math.round(percentage))
+      } catch (error) {
+        console.error('Failed to update progress:', error)
+      }
     }
   }
 
-  const handleComplete = () => {
-    setIsCompleted(true)
+  const handleComplete = async () => {
+    setLoadingProgress(true)
+    try {
+      await markComplete('lesson', lessonId)
+      setIsCompleted(true)
+      toast({
+        title: "课程已完成！",
+        description: "您的学习进度已保存。",
+      })
+    } catch (error) {
+      console.error('Failed to mark complete:', error)
+      toast({
+        title: "保存失败",
+        description: "无法保存您的进度，请稍后重试。",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingProgress(false)
+    }
   }
 
-  if (!lesson) {
+  if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <GlassCard className="text-center">
-          <p className="text-zinc-400">Lesson not found</p>
-          <Link href="/path">
-            <Button className="mt-4">Back to Path</Button>
-          </Link>
-        </GlassCard>
+      <div className="min-h-screen py-8">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-white/[0.08] rounded w-1/4" />
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="h-32 bg-white/[0.04] rounded-lg" />
+                <div className="h-64 bg-white/[0.04] rounded-lg" />
+              </div>
+              <div className="h-96 bg-white/[0.04] rounded-lg" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (result?.error || !lesson) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-6">
+        {result?.error ? (
+          <ErrorDisplay
+            error={result.error}
+            onRetry={() => window.location.reload()}
+          />
+        ) : (
+          <GlassCard className="text-center">
+            <p className="text-zinc-400">Lesson not found</p>
+            <div className="flex gap-4 mt-4">
+              <button onClick={() => router.back()} className="text-sm text-zinc-400 hover:text-white">
+                ← Back
+              </button>
+              <Link href="/lessons">
+                <Button>Browse Lessons</Button>
+              </Link>
+            </div>
+          </GlassCard>
+        )}
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      {/* SEO Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": lesson.title,
+            "description": lesson.description || '',
+            "author": {
+              "@type": "Organization",
+              "name": "Learn Chinese"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "Learn Chinese",
+              "url": "https://learn-chinese.example.com"
+            },
+            "datePublished": lesson.createdAt || new Date().toISOString(),
+            "dateModified": lesson.updatedAt || new Date().toISOString(),
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": `https://learn-chinese.example.com/lesson/${lesson.slug}`
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://learn-chinese.example.com"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Lessons",
+                  "item": "https://learn-chinese.example.com/lessons"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 3,
+                  "name": lesson.title,
+                  "item": `https://learn-chinese.example.com/lesson/${lesson.slug}`
+                }
+              ]
+            }
+          })
+        }}
+      />
+
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
@@ -113,15 +257,31 @@ export default function LessonPage() {
               </span>
             </div>
             <h1 className="mt-2 text-2xl font-bold text-white">{lesson.title}</h1>
-            <p className="mt-1 text-zinc-400">{lesson.summary}</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {lesson.tags.map((tag) => (
-                <span key={tag} className="rounded-full bg-white/5 px-3 py-1 text-xs text-zinc-400">
-                  {tag}
-                </span>
-              ))}
-            </div>
+            <p className="mt-1 text-zinc-400">{String(lesson.description || '')}</p>
+            {lesson.tags && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {lesson.tags.map((tag) => (
+                  <span key={tag} className="rounded-full bg-white/5 px-3 py-1 text-xs text-zinc-400">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setBookmarked(!bookmarked)}
+            className={cn(
+              "p-2 rounded-lg transition-colors",
+              bookmarked
+                ? "bg-yellow-500/20 text-yellow-400"
+                : "text-zinc-500 hover:bg-white/[0.06] hover:text-yellow-400"
+            )}
+            title={bookmarked ? "Remove bookmark" : "Bookmark this lesson"}
+          >
+            <BookmarkPlus className={cn("h-5 w-5", bookmarked && "fill-current")} />
+          </button>
         </div>
       </div>
 
@@ -154,9 +314,9 @@ export default function LessonPage() {
           </div>
 
           {/* Dialogue Cards */}
-          <GlassCard glowColor="amber">
+          <GlassCard glowColor="gold">
             <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
-              <BookOpen className="h-5 w-5 text-amber-400" />
+              <BookOpen className="h-5 w-5 text-yellow-400" />
               Dialogue
             </h3>
             <div className="space-y-4">
@@ -219,7 +379,7 @@ export default function LessonPage() {
 
           {/* Review Section (shown on review step) */}
           {currentStep === "review" && (
-            <GlassCard glowColor="emerald">
+            <GlassCard glowColor="jade">
               <h3 className="mb-4 text-lg font-semibold text-white">Lesson Summary</h3>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl bg-white/5 p-4">
@@ -234,18 +394,25 @@ export default function LessonPage() {
               {!isCompleted ? (
                 <Button
                   onClick={handleComplete}
+                  disabled={loadingProgress}
                   className="mt-4 w-full bg-emerald-500 hover:bg-emerald-600"
                 >
-                  <Check className="mr-2 h-4 w-4" />
-                  Mark Lesson Complete
+                  {loadingProgress ? (
+                    <>加载中...</>
+                  ) : (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      标记课程为完成
+                    </>
+                  )}
                 </Button>
               ) : (
                 <div className="mt-4 rounded-xl bg-emerald-500/20 p-4 text-center">
                   <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400" />
-                  <p className="mt-2 font-medium text-emerald-400">Lesson Completed!</p>
-                  <Link href="/path">
+                  <p className="mt-2 font-medium text-emerald-400">课程已完成！</p>
+                  <Link href="/dashboard">
                     <Button variant="outline" className="mt-3 bg-transparent">
-                      Back to Path
+                      返回学习面板
                     </Button>
                   </Link>
                 </div>
@@ -318,19 +485,19 @@ export default function LessonPage() {
                         <p className="text-sm text-zinc-400">{word.meaning}</p>
                       </div>
                       <div className="flex flex-col gap-1">
-                        <button
-                          onClick={() => handleAddToSrs(word)}
-                          disabled={isAdded || isKnown}
-                          className={cn(
-                            "rounded-lg p-1.5 transition-colors",
-                            isAdded
-                              ? "bg-emerald-500/20 text-emerald-400"
-                              : "bg-white/5 text-zinc-400 hover:bg-cyan-500/20 hover:text-cyan-400"
-                          )}
-                          title="Add to SRS"
-                        >
-                          {isAdded ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                        </button>
+                        <AddToSRSButton
+                          contentType="vocabulary"
+                          content={{
+                            front: word.word,
+                            back: word.meaning,
+                            pinyin: word.pinyin,
+                            example: word.key_points?.[0],
+                          }}
+                          sourceType="lesson"
+                          sourceId={lesson.id}
+                          variant="icon"
+                          onSuccess={() => handleAddToSrs(word)}
+                        />
                         <button
                           onClick={() => handleMarkKnown(word)}
                           disabled={isKnown}
@@ -359,5 +526,6 @@ export default function LessonPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

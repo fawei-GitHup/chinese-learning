@@ -589,7 +589,7 @@ export const medicalLexicon: MedicalWord[] = [
     word: "疼痛",
     pinyin: "téngtòng",
     meanings_en: ["pain", "ache"],
-    category: "symptom",\
+    category: "symptom",
     collocations: [
       { zh: "剧烈疼痛", pinyin: "jùliè téngtòng", en: "severe pain" },
       { zh: "持续疼痛", pinyin: "chíxù téngtòng", en: "continuous pain" },
@@ -708,7 +708,7 @@ export const medicalLexicon: MedicalWord[] = [
       "Often associated with tension headaches",
     ],
     say_it_like: [
-      { zh: "额头", en: \"forehead (more casual)" },
+      { zh: "额头", en: "forehead (more casual)" },
     ],
     dont_say: [],
     relatedWords: ["mw8", "mw10"],
@@ -845,7 +845,7 @@ export const medicalLexicon: MedicalWord[] = [
     examples: [
       { cn: "医生让我抽血检查。", en: "The doctor asked me to get a blood test.", pinyin: "Yīshēng ràng wǒ chōuxuè jiǎnchá." },
     ],
-    geo_snippet: \"Chōuxuè (抽血) means to draw blood for testing in Chinese hospitals.",
+    geo_snippet: "Chōuxuè (抽血) means to draw blood for testing in Chinese hospitals.",
     key_points: [
       "Common hospital procedure",
       "Often requires fasting beforehand",
@@ -985,8 +985,8 @@ export const medicalLexicon: MedicalWord[] = [
     pinyin: "guòmǐn",
     meanings_en: ["allergy", "allergic", "to be allergic"],
     category: "symptom",
-    collocations: [\
-      { zh: "过敏反应", pinyin: "guòmǐn fǎnyìng", en: "allergic reaction" },\
+    collocations: [
+      { zh: "过敏反应", pinyin: "guòmǐn fǎnyìng", en: "allergic reaction" },
       { zh: "药物过敏", pinyin: "yàowù guòmǐn", en: "drug allergy" },
     ],
     examples: [
@@ -1134,9 +1134,9 @@ export const medicalLexicon: MedicalWord[] = [
     examples: [
       { cn: "腿有点麻木。", en: "My leg feels a bit numb.", pinyin: "Tuǐ yǒudiǎn mámù." },
     ],
-    geo_snippet: \"Mámù (麻木) means numbness in Chinese, an important neurological symptom to report.",
+    geo_snippet: "Mámù (麻木) means numbness in Chinese, an important neurological symptom to report.",
     key_points: [
-      \"Important symptom - may indicate nerve issues",
+      "Important symptom - may indicate nerve issues",
       "Describe location and duration",
       "Can accompany pain or occur alone",
       "May require neurological examination",
@@ -1301,8 +1301,8 @@ export const medicalLexicon: MedicalWord[] = [
     ],
     examples: [
       { cn: "请问儿科在几楼？", en: "Which floor is pediatrics on?", pinyin: "Qǐngwèn érkē zài jǐ lóu?" },
-    ],\
-    geo_snippet: \"Érkē (儿科) is the pediatrics department in Chinese hospitals, treating children\'s health issues.",\
+    ],
+    geo_snippet: "Érkē (儿科) is the pediatrics department in Chinese hospitals, treating children's health issues.",
     key_points: [
       "For patients under 14-18 (varies by hospital)",
       "Specialized for children's conditions",
@@ -1483,11 +1483,11 @@ export const medicalLexicon: MedicalWord[] = [
     collocations: [
       { zh: "喉咙痛", pinyin: "hóulóng tòng", en: "sore throat" },
       { zh: "喉咙发炎", pinyin: "hóulóng fāyán", en: "throat inflammation" },
-    ],\
-    examples: [\
+    ],
+    examples: [
       { cn: "我喉咙很痛。", en: "My throat really hurts.", pinyin: "Wǒ hóulóng hěn tòng." },
-    ],\
-    geo_snippet: \"Hóulóng (喉咙) means throat in Chinese, commonly affected by colds and infections.",
+    ],
+    geo_snippet: "Hóulóng (喉咙) means throat in Chinese, commonly affected by colds and infections.",
     key_points: [
       "Common cold symptom area",
       "May indicate strep or viral infection",
@@ -1667,14 +1667,14 @@ export const medicalLexicon: MedicalWord[] = [
   {
     id: "mw50",
     word: "家族病史",
-    pinyin: "jiāzú bìngshǐ",\
-    meanings_en: [\"family medical history"],
+    pinyin: "jiāzú bìngshǐ",
+    meanings_en: ["family medical history"],
     category: "history",
     collocations: [
-      { zh: "家族病史调查", pinyin: \"jiāzú bìngshǐ diàochá", en: "family history survey" },
+      { zh: "家族病史调查", pinyin: "jiāzú bìngshǐ diàochá", en: "family history survey" },
     ],
     examples: [
-      { cn: "家里人有糖尿病吗？", en: \"Does anyone in your family have diabetes?", pinyin: "Jiālǐ rén yǒu tángniàobìng ma?" },
+      { cn: "家里人有糖尿病吗？", en: "Does anyone in your family have diabetes?", pinyin: "Jiālǐ rén yǒu tángniàobìng ma?" },
     ],
     geo_snippet: "Jiāzú bìngshǐ (家族病史) means family medical history in Chinese.",
     key_points: [
@@ -1866,18 +1866,18 @@ export const medicalLexicon: MedicalWord[] = [
     examples: [
       { cn: "需要做个CT检查。", en: "You need to do a CT scan.", pinyin: "Xūyào zuò ge CT jiǎnchá." },
     ],
-    geo_snippet: \"CT is used directly in Chinese for computed tomography scan, an advanced imaging test.",
+    geo_snippet: "CT is used directly in Chinese for computed tomography scan, an advanced imaging test.",
     key_points: [
       "More detailed than X-ray",
-      \"May require contrast dye",
-      \"Some radiation exposure",
+      "May require contrast dye",
+      "Some radiation exposure",
       "Used for detailed internal imaging",
     ],
     say_it_like: [],
-    dont_say: [],\
+    dont_say: [],
     relatedWords: ["mw37", "mw57"],
-  },\
-  {\
+  },
+  {
     id: "mw59",
     word: "核磁共振",
     pinyin: "hécí gòngzhèn",
@@ -2100,15 +2100,15 @@ export const medicalLexicon: MedicalWord[] = [
     meanings_en: ["injection", "to give/get an injection"],
     category: "medicine",
     collocations: [
-      { zh: "打针吃药\", pinyin: "dǎ zhēn chī yào", en: "injections and medication" },
+      { zh: "打针吃药", pinyin: "dǎ zhēn chī yào", en: "injections and medication" },
     ],
-    examples: [\
-      { cn: "需要打针吗？", en: "Do I need an injection?", pinyin: \"Xūyào dǎ zhēn ma?" },
-    ],\
+    examples: [
+      { cn: "需要打针吗？", en: "Do I need an injection?", pinyin: "Xūyào dǎ zhēn ma?" },
+    ],
     geo_snippet: "Dǎ zhēn (打针) means to give or receive an injection in Chinese.",
     key_points: [
-      \"Can be IV, intramuscular, subcutaneous",
-      \"More common in Chinese hospitals than West",
+      "Can be IV, intramuscular, subcutaneous",
+      "More common in Chinese hospitals than West",
       "Follow nurse instructions",
     ],
     say_it_like: [],
@@ -2343,15 +2343,15 @@ export const medicalLexicon: MedicalWord[] = [
   {
     id: "mw79",
     word: "注意事项",
-    pinyin: "zhùyì shìxiàng\",\
-    meanings_en: [\"precautions\", \"things to note"],\
-    category: "medicine",\
+    pinyin: "zhùyì shìxiàng",
+    meanings_en: ["precautions", "things to note"],
+    category: "medicine",
     collocations: [
-      { zh: "用药注意事项", pinyin: \"yòngyào zhùyì shìxiàng", en: \"medication precautions\" },
+      { zh: "用药注意事项", pinyin: "yòngyào zhùyì shìxiàng", en: "medication precautions" },
     ],
     examples: [
-      { cn: "有什么注意事项吗？", en: "Is there anything I should be aware of?", pinyin: \"Yǒu shénme zhùyì shìxiàng ma?" },
-    ],\
+      { cn: "有什么注意事项吗？", en: "Is there anything I should be aware of?", pinyin: "Yǒu shénme zhùyì shìxiàng ma?" },
+    ],
     geo_snippet: "Zhùyì shìxiàng (注意事项) means precautions or things to note in Chinese.",
     key_points: [
       "Always ask when getting prescriptions",
@@ -2568,15 +2568,15 @@ export const medicalGrammar: MedicalGrammarPattern[] = [
     pattern: "给 + Person + V",
     level: "HSK2",
     explanation_en: "Do something for someone - benefactive pattern",
-    geo_snippet: \"The \'给 + Person + Verb\' pattern indicates doing something for someone\'s benefit, common in medical prescriptions.",\
+    geo_snippet: "The '给 + Person + Verb' pattern indicates doing something for someone's benefit, common in medical prescriptions.",
     key_points: [
-      \"Doctor does action for patient",
+      "Doctor does action for patient",
       "Very common in prescriptions",
       "Indirect object pattern",
-      "Patient is beneficiary",\
+      "Patient is beneficiary",
     ],
     examples: [
-      { cn: \"我给您开点药。", en: \"I\'ll prescribe some medicine for you." },
+      { cn: "我给您开点药。", en: "I'll prescribe some medicine for you." },
       { cn: "护士给我量了体温。", en: "The nurse took my temperature." },
     ],
     common_mistakes: [
@@ -2811,18 +2811,18 @@ export const medicalGrammar: MedicalGrammarPattern[] = [
     geo_snippet: "The '控制得' pattern describes how well something is managed, commonly used for chronic condition follow-ups.",
     key_points: [
       "Describes management outcome",
-      \"Common for chronic diseases",
+      "Common for chronic diseases",
       "得 links verb to result",
       "Used in follow-up visits",
     ],
-    examples: [\
-      { cn: "血糖控制得怎么样？\", en: \"How is your blood sugar control?" },
+    examples: [
+      { cn: "血糖控制得怎么样？", en: "How is your blood sugar control?" },
       { cn: "控制得比较好。", en: "It's fairly well controlled." },
     ],
     common_mistakes: [
       "Forgetting 得 before result",
-    ],\
-    clinic_templates: [\
+    ],
+    clinic_templates: [
       { intent: "med_history", zh: "[病情]控制得[结果]。", en: "[Condition] is controlled [result]." },
     ],
     relatedWords: ["mw31", "mw32"],

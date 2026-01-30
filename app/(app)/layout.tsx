@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { getSession } from "@/lib/supabase/auth"
 import { WebShell } from "@/components/web/WebShell"
 import { mockUser } from "@/lib/web-mock"
+import { FeedbackButton } from "@/components/feedback/FeedbackButton"
 
 /**
  * Layout for the learning area (app routes)
@@ -22,5 +23,10 @@ export default async function AppLayout({
     redirect('/login')
   }
 
-  return <WebShell streakDays={mockUser.streakDays}>{children}</WebShell>
+  return (
+    <>
+      <WebShell streakDays={mockUser.streakDays}>{children}</WebShell>
+      <FeedbackButton />
+    </>
+  )
 }
