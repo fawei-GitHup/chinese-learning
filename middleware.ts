@@ -17,12 +17,7 @@ const handleI18nRouting = createIntlMiddleware({
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // 如果是根路径，先让 next-intl 处理重定向
-  if (pathname === '/') {
-    return handleI18nRouting(request);
-  }
-
-  // 学习区保护的路径
+  // 学习区保护的路径（不含locale前缀）
   const protectedPaths = [
     '/dashboard',
     '/account',
@@ -38,14 +33,19 @@ export async function middleware(request: NextRequest) {
     '/srs',
   ];
 
+  // 提取pathname中去除locale前缀后的路径
+  // pathname格式: /zh-CN/xxx 或 /en/xxx
+  const pathnameWithoutLocale = pathname.replace(/^\/(zh-CN|en)(\/|$)/, '$2');
+
   // 检查当前路径是否需要认证（学习区）
   const isProtectedPath = protectedPaths.some(path => 
-    pathname === path || pathname.startsWith(`${path}/`)
+    pathnameWithoutLocale === path.slice(1) || // 匹配根路径如 "/dashboard" -> "dashboard"
+    pathnameWithoutLocale.startsWith(path.slice(1) + '/') // 匹配子路径
   );
 
   // 如果是学习区，进行认证检查
   if (isProtectedPath) {
-    const response = NextResponse.next();
+    const response = handleI18nRouting(request);
     
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -65,7 +65,11 @@ export async function middleware(request: NextRequest) {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session) {
-      const loginUrl = new URL('/zh-CN/login', request.url);
+      // 提取locale
+      const localeMatch = pathname.match(/^\/(zh-CN|en)/);
+      const locale = localeMatch ? localeMatch[1] : defaultLocale;
+      
+      const loginUrl = new URL(` /${locale}/login`, request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -73,7 +77,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // 对于营销区，使用 next-intl 中间件
+  // 对于营销区和其他所有路径，使用 next-intl 中间件
   return handleI18nRouting(request);
 }
 
